@@ -66,7 +66,7 @@ Usually when handling large sequencing data, both FASTA and QUAL files are merge
 
 Having the sequence read along with quality doesn’t help us to infer much from the data. So, the first step we must take is to compare it to a reference. This requires an alignment map. There are three main file formats for alignment maps, all including the same information (a header, individual sequencing reads from your sample, and the reference genome). They are called SAM (sequence alignment map), BAM (binary alignment map), and CRAM (compressed alignment map).
 
-(SAM)[] files are human-readable; that is, if you know what each part of the file means, you can read it line-by-line. A SAM file looks like this:
+(SAM)[https://samtools.github.io/hts-specs/SAMv1.pdf] files are human-readable; that is, if you know what each part of the file means, you can read it line-by-line. A SAM file looks like this:
 
 ![](media/sam_screenshot.png)<!-- style = "border: 1px solid rgb(var(--color-highlight)); max-width: 600px; float: left; margin-right: 2rem; margin-bottom: 2rem;"-->
 
@@ -84,7 +84,7 @@ But this really does contain the same information. Using some software (which we
 
 *Figure 6. Part of a BAM file, viewed using the Samtools software, which is identical in format and content to a SAM file.*
 
-Sometimes you might need to look specifically at variant calls. Maybe you need to see the differences between your sample sequence and the reference genome. Alternatively, you might just need a list of known, common variants in the population to use as a reference. For these applications, variants are almost always in (Variant Call Format)[] (VCF), a very specific tab- delimited text file. VCFs have a header giving specifications for the contents of the file, and then have a table-like structure where variants are the rows and individuals are the columns, looking something like this:
+Sometimes you might need to look specifically at variant calls. Maybe you need to see the differences between your sample sequence and the reference genome. Alternatively, you might just need a list of known, common variants in the population to use as a reference. For these applications, variants are almost always in (Variant Call Format)[https://samtools.github.io/hts-specs/VCFv4.2.pdf] (VCF), a very specific tab- delimited text file. VCFs have a header giving specifications for the contents of the file, and then have a table-like structure where variants are the rows and individuals are the columns, looking something like this:
 
 ![](media/vcf_header_screenshot.png)<!-- style = "border: 1px solid rgb(var(--color-highlight)); max-width: 600px; float: left; margin-right: 2rem; margin-bottom: 2rem;"-->
 
@@ -106,9 +106,9 @@ Lastly, a BED file is a tab-delimited file that is used to specify regions of th
 
 *Figure 9. Portion of a BED file, which specifies regions of the genome by chromosome, start position, and end position.*
 
-There are also several different software tools that have been developed to work with different genomic data, all run from the (command line)[]. (Samtools)[] is our main set of programs for working with alignment maps. In order to generate these alignments, we will use (BWA)[] or the Burrows- Wheeler Aligner software together with (Samblaster)[]. (PicardTools)[] is another set of command line tools, developed by the Broad Institute in Java, for working with sequencing data. Our standard workflow relies mainly on a suite known as (Genome Analysis ToolKit)[] (GATK) developed by the Broad Institute. GATK is based in Java and includes many tools for calling, genotyping, and filtering variants. Finally, the variant output will be processed using (Annovar)[], a tool to annotate variants to better understand their impact. Don’t worry too much about the specifics yet—we will work with features of each of these during our exome tutorial.
+There are also several different software tools that have been developed to work with different genomic data, all run from the (command line)[https://digitalrepository.chop.edu/commandline_computingtools/]. (Samtools)[http://www.htslib.org/] is our main set of programs for working with alignment maps. In order to generate these alignments, we will use (BWA)[http://bio-bwa.sourceforge.net/] or the Burrows- Wheeler Aligner software together with (Samblaster)[https://github.com/GregoryFaust/samblaster]. (PicardTools)[https://broadinstitute.github.io/picard/] is another set of command line tools, developed by the Broad Institute in Java, for working with sequencing data. Our standard workflow relies mainly on a suite known as (Genome Analysis ToolKit)[https://gatk.broadinstitute.org/] (GATK) developed by the Broad Institute. GATK is based in Java and includes many tools for calling, genotyping, and filtering variants. Finally, the variant output will be processed using (Annovar)[https://annovar.openbioinformatics.org/], a tool to annotate variants to better understand their impact. Don’t worry too much about the specifics yet—we will work with features of each of these during our exome tutorial.
 
-Before working through this module, we would recommend being familiar with the (command line)[], as nearly all of this workflow takes place within the terminal. It would also be helpful to know some (R)[] or (Python)[] for the final steps of variant discovery. While you will be using reference files and raw data that are in a shared directory within the Arcus lab space, please ensure your working directory is your folder, `/mnt/arcus/lab/users/[username]`. All of your scripts and all files you generate should appear there! We also supply a copy of all intermediate files that you will create during the workflow, although you likely will not need to use them; these are located at `/mnt/arcus/lab/shared/raw_data/intermediate_files`.
+Before working through this module, we would recommend being familiar with the (command line)[https://digitalrepository.chop.edu/commandline_computingtools/], as nearly all of this workflow takes place within the terminal. It would also be helpful to know some (R)[https://liascript.github.io/course/?https://raw.githubusercontent.com/arcus/Arcus_Labs_Orientation/main/new_to_r.md] or (Python)[https://liascript.github.io/course/?https://raw.githubusercontent.com/arcus/Arcus_Labs_Orientation/main/new_to_python.md] for the final steps of variant discovery. While you will be using reference files and raw data that are in a shared directory within the Arcus lab space, please ensure your working directory is your folder, `/mnt/arcus/lab/users/[username]`. All of your scripts and all files you generate should appear there! We also supply a copy of all intermediate files that you will create during the workflow, although you likely will not need to use them; these are located at `/mnt/arcus/lab/shared/raw_data/intermediate_files`.
 
 
 ## Chapter 2 - Getting Started with Exome
@@ -151,7 +151,7 @@ We’ll now take the first step to obtain our FASTQ files. If you’re wondering
 - In this tutorial, we also do this realignment step for illustrative purposes. Sometimes, data are delivered in FASTQ format, which will require alignment from scratch anyway.
 - Sometimes, data are delivered already aligned to a different version of the human genome than the one you want to work with (i.e., hg19 vs hg38), and you’ll need to go back to the raw FASTQ in order to realign to the intended reference version.
 
-Because our data are in a compressed CRAM format, we will need to first decompress it and create a corresponding BAM file using (Samtools)[] for each of the three individuals in the trio:
+Because our data are in a compressed CRAM format, we will need to first decompress it and create a corresponding BAM file using (Samtools)[http://www.htslib.org/] for each of the three individuals in the trio:
 
 ```
 #!/bin/bash
@@ -163,7 +163,7 @@ do:
 done
 ```
 
-From this BAM file, we can obtain the original reads using (PicardTools)[]. Recall that as this is paired-end sequencing, one alignment map corresponds to two FASTQ files!
+From this BAM file, we can obtain the original reads using (PicardTools)[https://broadinstitute.github.io/picard/]. Recall that as this is paired-end sequencing, one alignment map corresponds to two FASTQ files!
 
 ```
 #!/bin/bash
@@ -189,7 +189,7 @@ Congratulations! You now have the raw sequencing reads. Onward to variant discov
 
 Raw reads are of limited value unless we know where in the genome they are from, and so aligning to a reference genome is the first major step in analyzing any sequencing data.
 
-The alignment process will consist of three consecutive steps. As you’ll see below, they are typically run together for efficiency, but you may want to run these separately just to be familiar with the intermediate steps. First, we will use the (Burrows-Wheeler Aligner)[] to perform the actual mapping. Each read from the FASTQ files will be positioned along the reference genome. This will produce a SAM file, a human-readable alignment map.
+The alignment process will consist of three consecutive steps. As you’ll see below, they are typically run together for efficiency, but you may want to run these separately just to be familiar with the intermediate steps. First, we will use the (Burrows-Wheeler Aligner)[http://bio-bwa.sourceforge.net/] to perform the actual mapping. Each read from the FASTQ files will be positioned along the reference genome. This will produce a SAM file, a human-readable alignment map.
 
 ```
 #!/bin/bash
@@ -201,7 +201,7 @@ done
 
 Most of this script is what you’d expect: We provide the FASTQs to align, the reference to which to align, and specify the output SAM file. The argument following ‘-R' is the read group header line, which we add in order to specify that all of the reads included came from one sequencing run, i.e., one pair of FASTQ files. It identifies the sample and sequencing run and provides details for the tools used to perform the sequencing, i.e., sequencing platform (PL:Illumina) and library (LB:SureSelect).
 
-Second, we will use (Samblaster)[] to mark duplicate reads. This is critical because duplicate reads, or repeat measurements, can occur from sequencing error. Samblaster also affords us the opportunity to add some additional details to our alignment map. Recall that every step of the process cannot have 100% accuracy, and instead is done with a certain level of confidence, or “quality.” Here, the aligner tries to match each sequencing read to a part of the reference genome, and can achieve this more confidently for some reads than others. This confidence is captured by mapping quality (MQ), analogous to the base quality (BQ) that captured the confidence of each base call during the sequencing itself. Samblaster adds in these MQ scores in addition to marking the duplicate reads.
+Second, we will use (Samblaster)[https://github.com/GregoryFaust/samblaster] to mark duplicate reads. This is critical because duplicate reads, or repeat measurements, can occur from sequencing error. Samblaster also affords us the opportunity to add some additional details to our alignment map. Recall that every step of the process cannot have 100% accuracy, and instead is done with a certain level of confidence, or “quality.” Here, the aligner tries to match each sequencing read to a part of the reference genome, and can achieve this more confidently for some reads than others. This confidence is captured by mapping quality (MQ), analogous to the base quality (BQ) that captured the confidence of each base call during the sequencing itself. Samblaster adds in these MQ scores in addition to marking the duplicate reads.
 
 ```
 #!/bin/bash
@@ -248,7 +248,7 @@ do
 done
 ```
 
-The next step is to recalibrate the base quality scores. Base quality score recalibration (BQSR) is a deep topic to discuss. The GATK website discusses this at length and is highly (interesting reading)[], but we will only briefly summarize the idea here. Essentially, base quality scores can suffer from bias. Recall that BQ scores are part of our raw sequence data and represent the sequencer’s confidence that a given base was correctly called. BQSR analyzes the entire set of BQ scores to assess what factors of the sequence might contribute to a sequencer being over- or under-confident in its calls. This produces a table, which it uses to adjust these scores up or down accordingly. By mitigating sequencer bias, BQSR makes it more likely that variants we call going forward are genuine and unbiased. We use two lines of code for BQSR, one to generate the recalibration table and one to transform the actual scores:
+The next step is to recalibrate the base quality scores. Base quality score recalibration (BQSR) is a deep topic to discuss. The GATK website discusses this at length and is highly (interesting reading)[https://gatk.broadinstitute.org/hc/en-us/articles/360035890531-Base-Quality-Score-Recalibration-BQSR-], but we will only briefly summarize the idea here. Essentially, base quality scores can suffer from bias. Recall that BQ scores are part of our raw sequence data and represent the sequencer’s confidence that a given base was correctly called. BQSR analyzes the entire set of BQ scores to assess what factors of the sequence might contribute to a sequencer being over- or under-confident in its calls. This produces a table, which it uses to adjust these scores up or down accordingly. By mitigating sequencer bias, BQSR makes it more likely that variants we call going forward are genuine and unbiased. We use two lines of code for BQSR, one to generate the recalibration table and one to transform the actual scores:
 
 ```
 #!/bin/bash
@@ -278,7 +278,7 @@ do
      java -Xmx8000m -jar /opt/gatk-4.3.0.0/gatk-package-4.3.0.0-local.jar HaplotypeCaller -R /mnt/arcus/data/references/hs37d5_chr9.fa -I FAM1${i}.sorted.recal_data.bam -ERC GVCF -G StandardAnnotation -G AS_StandardAnnotation -G StandardHCAnnotation -O FAM1${i}.sorted.recal_data.gVCF
 done
 ```
-Once each individual’s gVCF is created, we can combine them. Remember that down the line, we want to analyze these three samples together as a trio in order to use parental information to help find a diagnostic variant in the proband. By combining the samples at this stage, the subsequent algorithms can potentially benefit from the extra information from including additional samples. In our small case example, this effect is minimal to nonexistent, but with large cohorts, this represents best practice. The (GATK documentation)[] details this in more depth.
+Once each individual’s gVCF is created, we can combine them. Remember that down the line, we want to analyze these three samples together as a trio in order to use parental information to help find a diagnostic variant in the proband. By combining the samples at this stage, the subsequent algorithms can potentially benefit from the extra information from including additional samples. In our small case example, this effect is minimal to nonexistent, but with large cohorts, this represents best practice. The (GATK documentation)[https://gatk.broadinstitute.org/hc/en-us/articles/360035890431-The-logic-of-joint-calling-for-germline-short-variants] details this in more depth.
 
 ```
 #!/bin/bash
@@ -318,7 +318,7 @@ java -Xmx8000m -jar /opt/gatk-4.3.0.0/gatk-package-4.3.0.0-local.jar SelectVaria
 java -Xmx8000m -jar /opt/gatk-4.3.0.0/gatk-package-4.3.0.0-local.jar SelectVariants -R /mnt/arcus/data/references/hs37d5_chr9.fa -V genotyped_FAM1.vcf --select-type INDEL -O raw_indels.vcf
 ```
 
-Next, we can look at a whole slew of metrics to filter on. For large cohorts, GATK would recommend (variant quality score recalibration)[] (VQSR), which uses information for variant calls from a large set of individuals to filter using statistical models. In contrast, for our single trio, we will practice hard-filtering, which uses predetermined threshold values for some metrics to filter variants that are unlikely to be real. These are based on (recommendations)[] from GATK. We will briefly summarize the rationale for each.
+Next, we can look at a whole slew of metrics to filter on. For large cohorts, GATK would recommend (variant quality score recalibration)[https://gatk.broadinstitute.org/hc/en-us/articles/360035531612-Variant-Quality-Score-Recalibration-VQSR-] (VQSR), which uses information for variant calls from a large set of individuals to filter using statistical models. In contrast, for our single trio, we will practice hard-filtering, which uses predetermined threshold values for some metrics to filter variants that are unlikely to be real. These are based on (recommendations)[https://gatk.broadinstitute.org/hc/en-us/articles/360035890471-Hard-filtering-germline-short-variants] from GATK. We will briefly summarize the rationale for each.
 
 A variant call is unlikely to be real if there is a reasonable chance that there is no variant at all at that position. This can be determined through the calculations involved in the earlier genotyping step and is represented by the value QD (or QualByDepth).
 
@@ -359,7 +359,7 @@ especially compared to the lower file (decomposed), where each variant gets its 
 vt decompose -s genotyped_FAM1_filtered.vcf -o genotyped_FAM1_filtered_decomposed.vcf
 ```
 
-Left-normalization helps ensure consistent notation of indel variants. Here’s a nice figure from Michigan’s (Genome Analysis Wiki)[] showing the same variant written five different ways:
+Left-normalization helps ensure consistent notation of indel variants. Here’s a nice figure from Michigan’s (Genome Analysis Wiki)[https://genome.sph.umich.edu/wiki/Variant_Normalization/] showing the same variant written five different ways:
 
 ![](media/normalization_screenshot.png)<!-- style = "border: 1px solid rgb(var(--color-highlight)); max-width: 600px; float: left; margin-right: 2rem; margin-bottom: 2rem;"-->
 
@@ -380,14 +380,14 @@ Ready to see what these variants are? Let’s find out in the next chapter!
 
 A fully processed VCF captures a massive list of likely variants. What remains to be seen, though, is what these variants actually are. Where is this variant located? What gene is it in? How can we classify it—is it missense, frameshift, synonymous, intronic? Is it commonly seen in healthy individuals? Many of these details can be incredibly useful in variant interpretation.
 
-Accordingly, we want to annotate every variant in this VCF with corresponding details. Tools such as the Ensembl (Variant Effect Predictor)[] (VEP) and (Annovar)[] take advantage of massive databases to label variants with large quantities of additional data. They can tell you, among other things:
+Accordingly, we want to annotate every variant in this VCF with corresponding details. Tools such as the Ensembl (Variant Effect Predictor)[https://useast.ensembl.org/info/docs/tools/vep/index.html] (VEP) and (Annovar)[https://annovar.openbioinformatics.org/en/latest/] take advantage of massive databases to label variants with large quantities of additional data. They can tell you, among other things:
 - what gene a variant is located in
 - what its consequence on that gene is
 - where on the chromosome the variant is
 - whether published computational prediction tools predict the variant to be damaging
 - whether the variant has been seen in population databases
 
-We will use Annovar to discover gene consequence and population frequencies for our called variants using (RefSeq)[] and (gnomAD)[]. RefSeq includes genome, transcript, and protein sequences which can be used to map variants to specific gene consequences. GnomAD includes >100,000 exomes from unaffected individuals, providing a powerful estimate of population frequencies for variants.
+We will use Annovar to discover gene consequence and population frequencies for our called variants using (RefSeq)[https://www.ncbi.nlm.nih.gov/refseq/] and (gnomAD)[https://gnomad.broadinstitute.org/]. RefSeq includes genome, transcript, and protein sequences which can be used to map variants to specific gene consequences. GnomAD includes >100,000 exomes from unaffected individuals, providing a powerful estimate of population frequencies for variants.
 
 Annovar yields two output files, VCF and TXT. The VCF file has annotations added to the INFO column, and while it can be useful, it is more difficult to work with downstream. In contrast, the TXT file is a neat, tab-delimited table containing all of this information while preserving the contents of the original VCF as well in columns named “Otherinfo.”
 
@@ -415,7 +415,7 @@ You could reasonably use any language you’re comfortable with for these downst
 
 Once you have potential variant(s) on hand, it’s useful to quickly check how reliable the variant is in two ways. First, it’s good to have a quick inspection of the preserved VCF data, especially the AD and DP fields. If these values are higher (>10), this indicates that the region was highly covered during sequencing, with large numbers of reads supporting the variant.
 
-Secondly, visualizing the putative variant is immensely useful. The Integrative Genomics Viewer is the preferred tool for this. It can be installed locally or used as a (web app)[]; we will use a version of the latter. We can view the aligned sequencing reads along with any differences present in these reads by loading the sorted BAM file and its index.
+Secondly, visualizing the putative variant is immensely useful. The Integrative Genomics Viewer is the preferred tool for this. It can be installed locally or used as a (web app)[http://igv.org/app]; we will use a version of the latter. We can view the aligned sequencing reads along with any differences present in these reads by loading the sorted BAM file and its index.
 
 Ensure you have the correct reference genome, hg19, loaded:
 
@@ -443,10 +443,10 @@ alleles
 As you can see, IGV is fantastic for additional visual confirmation of variant quality! You can even view multiple tracks at once. If you want to confirm a variant’s inheritance, it’s helpful to view the proband and both parents’ exomes at same region simultaneously to see reads supporting the inheritance model you predicted.
 
 It can also be useful to supplement our annotated data with additional sources, especially for potential variants that are not obviously pathogenic or in well-established disease genes. Here are some suggestions!
-- (ClinVar)[] for previous reports of a variant
-- (OMIM)[] for possible gene-disease associations
-- (gnomAD)[] for similar population variants, constraint metrics
-- (GTEx)[] for tissue expression information
+- (ClinVar)[https://www.ncbi.nlm.nih.gov/clinvar/] for previous reports of a variant
+- (OMIM)[https://www.omim.org/] for possible gene-disease associations
+- (gnomAD)[https://gnomad.broadinstitute.org/] for similar population variants, constraint metrics
+- (GTEx)[https://gtexportal.org/] for tissue expression information
 
 Hopefully, you find what you believe is a diagnostic variant for this proband. If so, we reveal this and conclude in the next section!
 
