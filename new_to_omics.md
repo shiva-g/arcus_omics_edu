@@ -156,10 +156,9 @@ Because our data are in a compressed CRAM format, we will need to first decompre
 ```
 #!/bin/bash
 for i in P M F
-do:
-     samtools view -bT /mnt/arcus/data/references/hs37d5_chr9.fa
-     /mnt/arcus/lab/shared/raw_data/FAM1${i}.cram -o FAM1${i}.bam
-     samtools index -b FAM1${i}.bam
+do
+samtools view -bT /mnt/arcus/data/references/hs37d5_chr9.fa /mnt/arcus/lab/shared/raw_data/FAM1${i}.cram -o FAM1${i}.bam
+samtools index -b FAM1${i}.bam
 done
 ```
 
@@ -168,10 +167,8 @@ From this BAM file, we can obtain the original reads using [PicardTools](https:/
 ```
 #!/bin/bash
 for i in P M F
-do:
-     java -Xmx8000m -jar /usr/local/bin/picard.jar SamToFastq
-     INPUT=FAM1${i}.bam VALIDATION_STRINGENCY=LENIENT
-     FASTQ=FAM1${i}_R1.fastq SECOND_END_FASTQ=FAM1${i}_R2.fastq
+do
+java -Xmx8000m -jar /usr/local/bin/picard.jar SamToFastq INPUT=FAM1${i}.bam VALIDATION_STRINGENCY=LENIENT FASTQ=FAM1${i}_R1.fastq SECOND_END_FASTQ=FAM1${i}_R2.fastq
 done
 ```
 
@@ -195,7 +192,7 @@ The alignment process will consist of three consecutive steps. As you’ll see b
 #!/bin/bash
 for i in P M F
 do
-     bwa mem -M -R “@RG\\tID:FAM1${i}\\tPU:Illumina\\tLB:SureSelect\\tPL:Illumina\\tSM:FAM1${i}” /mnt/arcus/data/references/hs37d5_chr9.fa FAM1${i}_R1.fastq FAM1${i}_R2.fastq > FAM1${i}.sam
+bwa mem -M -R “@RG\\tID:FAM1${i}\\tPU:Illumina\\tLB:SureSelect\\tPL:Illumina\\tSM:FAM1${i}” /mnt/arcus/data/references/hs37d5_chr9.fa FAM1${i}_R1.fastq FAM1${i}_R2.fastq > FAM1${i}.sam
 done
 ```
 
@@ -207,7 +204,7 @@ Second, we will use [Samblaster](https://github.com/GregoryFaust/samblaster) to 
 #!/bin/bash
 for i in P M F
 do
-     samblaster --addMateTags -i FAM1${i}.sam -o FAM1${i}_aln.sam
+samblaster --addMateTags -i FAM1${i}.sam -o FAM1${i}_aln.sam
 done
 ```
 
@@ -217,7 +214,7 @@ Lastly, we use Samtools to convert our SAM into a BAM file. This step significan
 #!/bin/bash
 for i in P M F
 do
-     samtools view -Sb FAM1P_samblaster.sam -o FAM1P_samblaster.bam
+samtools view -Sb FAM1P_samblaster.sam -o FAM1P_samblaster.bam
 done
 ```
 
@@ -227,7 +224,7 @@ Crucially, all of this can be done with a single line using the pipe operator. T
 #!/bin/bash
 for i in P M F
 do
-     bwa mem -M -R “@RG\\tID:FAM1${i}\\tPU:Illumina\\tLB:SureSelect\\tPL:Illumina\\tSM:FAM1${i}” /mnt/arcus/data/references/hs37d5_chr9.fa FAM1${i}_R1.fastq FAM1${i}_R2.fastq | samblaster --addMateTags | samtools view -Sb - > FAM1${i}_aln.bam
+bwa mem -M -R “@RG\\tID:FAM1${i}\\tPU:Illumina\\tLB:SureSelect\\tPL:Illumina\\tSM:FAM1${i}” /mnt/arcus/data/references/hs37d5_chr9.fa FAM1${i}_R1.fastq FAM1${i}_R2.fastq | samblaster --addMateTags | samtools view -Sb - > FAM1${i}_aln.bam
 done
 ```
 
@@ -243,8 +240,8 @@ We sort and index the BAM as follows:
 #!/bin/bash
 for i in P M F
 do
-     samtools sort -o FAM1${i}.sorted.bam FAM1${i}_aln.bam
-     samtools index FAM1${i}.sorted.bam
+samtools sort -o FAM1${i}.sorted.bam FAM1${i}_aln.bam
+samtools index FAM1${i}.sorted.bam
 done
 ```
 
@@ -254,9 +251,9 @@ The next step is to recalibrate the base quality scores. Base quality score reca
 #!/bin/bash
 for i in P M F
 do
-     java -Xmx8000m -jar /opt/gatk-4.3.0.0/gatk-package-4.3.0.0-local.jar BaseRecalibrator -R /mnt/arcus/data/references/hs37d5_chr9.fa -I FAM1${i}.sorted.bam --known-sites /mnt/arcus/data/references/ref_snps.vcf.gz --known-sites /mnt/arcus/data/references/ref_indels.vcf.gz -O FAM1${i}.sorted.recal_data.table
+java -Xmx8000m -jar /opt/gatk-4.3.0.0/gatk-package-4.3.0.0-local.jar BaseRecalibrator -R /mnt/arcus/data/references/hs37d5_chr9.fa -I FAM1${i}.sorted.bam --known-sites /mnt/arcus/data/references/ref_snps.vcf.gz --known-sites /mnt/arcus/data/references/ref_indels.vcf.gz -O FAM1${i}.sorted.recal_data.table
 
-     java -Xmx8000m -jar /opt/gatk-4.3.0.0/gatk-package-4.3.0.0-local.jar ApplyBQSR -R /mnt/arcus/data/references/hs37d5_chr9.fa -I FAM1${i}.sorted.bam --bqsr FAM1${i}.sorted.recal_data.table -O FAM1${i}.sorted.recal_data.bam
+java -Xmx8000m -jar /opt/gatk-4.3.0.0/gatk-package-4.3.0.0-local.jar ApplyBQSR -R /mnt/arcus/data/references/hs37d5_chr9.fa -I FAM1${i}.sorted.bam --bqsr FAM1${i}.sorted.recal_data.table -O FAM1${i}.sorted.recal_data.bam
 done
 ```
 
@@ -275,7 +272,7 @@ We use the HaplotypeCaller tool from GATK to compute these non-reference alleles
 #!/bin/bash
 for i in P M F
 do
-     java -Xmx8000m -jar /opt/gatk-4.3.0.0/gatk-package-4.3.0.0-local.jar HaplotypeCaller -R /mnt/arcus/data/references/hs37d5_chr9.fa -I FAM1${i}.sorted.recal_data.bam -ERC GVCF -G StandardAnnotation -G AS_StandardAnnotation -G StandardHCAnnotation -O FAM1${i}.sorted.recal_data.gVCF
+java -Xmx8000m -jar /opt/gatk-4.3.0.0/gatk-package-4.3.0.0-local.jar HaplotypeCaller -R /mnt/arcus/data/references/hs37d5_chr9.fa -I FAM1${i}.sorted.recal_data.bam -ERC GVCF -G StandardAnnotation -G AS_StandardAnnotation -G StandardHCAnnotation -O FAM1${i}.sorted.recal_data.gVCF
 done
 ```
 Once each individual’s gVCF is created, we can combine them. Remember that down the line, we want to analyze these three samples together as a trio in order to use parental information to help find a diagnostic variant in the proband. By combining the samples at this stage, the subsequent algorithms can potentially benefit from the extra information from including additional samples. In our small case example, this effect is minimal to nonexistent, but with large cohorts, this represents best practice. The [GATK documentation](https://gatk.broadinstitute.org/hc/en-us/articles/360035890431-The-logic-of-joint-calling-for-germline-short-variants) details this in more depth.
