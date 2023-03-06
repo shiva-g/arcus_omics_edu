@@ -44,7 +44,7 @@ You’ve got an exome sequence! Maybe even several. But how do you find “real�
 
 Here, we will explore how to handle whole-exome sequencing data and analyze to identify sequence variants. We will use an example to walk through the analysis pipeline step by step with the goal of identifying a disease-causing variant. The same basic workflows and principles can apply to other sequencing data as well, including panel data, whole-genome or RNAseq data.
 
-You may find it helpful to refresh, review, or introduce yourself to some of the fundamentals, including DNA and sequencing methods: (separate file, adapted from [Griffith Lab](https://pmbio.org/course/#module-02-inputs/))
+You may find it helpful to refresh, review, or introduce yourself to some of the fundamentals, including DNA and sequencing methods: (separate file, adapted from [Griffith Lab](media/AOS_PMBIO_Module02_Inputs_subset.pdf)
 
 When working with DNA sequences, you often need different information for different tasks. For example, you might want or need the original, raw data without adulteration. This typically has two components. First, there’s the sequence itself, or more accurately, many small sequence reads. This is typically formatted as FASTA:
 
